@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="10" height="10" tilewidth="32" tileheight="32" nextobjectid="1">
+ <tileset firstgid="1" name="wood_tileset" tilewidth="32" tileheight="32" tilecount="256" columns="16">
+  <image source="../../TileSheets/wood_tileset.png" width="512" height="512"/>
+ </tileset>
+ <tileset firstgid="257" name="roguelikeSheet_transparent" tilewidth="16" tileheight="16" spacing="1" tilecount="1767" columns="57">
+  <image source="../TileSheets/roguelikeSheet_transparent.png" width="968" height="526"/>
+ </tileset>
+ <layer name="Tile Layer 1" width="10" height="10">
+  <data encoding="csv">
+1,1,2,3,4,5,1,1,1,1,
+1,17,18,19,20,21,1,1,1,1,
+1,33,34,35,36,37,1,1,1,1,
+1,1,1,1,1,1,1,1,1,1,
+1,1,1,1,1,1,6,7,8,1,
+139,140,140,140,141,1,22,23,24,1,
+155,52,53,54,157,1,38,39,40,1,
+155,68,69,70,157,1,55,56,1,1,
+155,84,85,86,157,1,71,72,1,1,
+171,172,172,172,173,1,1,1,373,373
+</data>
+ </layer>
+</map>
