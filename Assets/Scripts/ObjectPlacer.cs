@@ -10,7 +10,6 @@ using TiledSharp;
 public class ObjectPlacer : MonoBehaviour {
 
     public bool createMapOnAwake = true;
-    public bool flipY = true;
     //public List<Texture2D> sheets = new List<Texture2D>();
     List<Sprite> spriteList = new List<Sprite> { null };
     Dictionary<int, TmxTilesetTile> tileGidMap = new Dictionary<int, TmxTilesetTile>();
@@ -46,7 +45,7 @@ public class ObjectPlacer : MonoBehaviour {
                 {
                     var tex = spriteList[tile.Gid];
                     var destx = tile.X * (map.TileWidth / tex.pixelsPerUnit);
-                    var desty = (flipY ? -1 : 1) * tile.Y * (map.TileWidth / tex.pixelsPerUnit);
+                    var desty = -tile.Y * (map.TileWidth / tex.pixelsPerUnit);
                     var go = addTileAsObject(tile, tex, destx, desty, layerindex);
                     if (go) go.transform.SetParent(lparent.transform);
                 }
@@ -79,12 +78,19 @@ public class ObjectPlacer : MonoBehaviour {
                             // Don't forget we have to convert from pixels to unity units!
                             float width = (float)collisionObject.Width / tex.pixelsPerUnit;
                             float height = (float)collisionObject.Height / tex.pixelsPerUnit;
-                            // the X and Y positions are the top left, we need to convert to unity's center
+                            
                             float centerXPos = (float)(collisionObject.X / tex.pixelsPerUnit);
-                            var centerYPos = (float)(collisionObject.X / tex.pixelsPerUnit);
+                            var centerYPos = (float)(-collisionObject.Y / tex.pixelsPerUnit); // the positive y cord in Tiled goes down so we have to flip it
 
                             boxCol.offset = new Vector2(centerXPos, centerYPos);
                             boxCol.size = new Vector2(width, height);
+                        }
+                        else if (collisionObject.ObjectType == TmxObjectType.Polygon) 
+                        {
+                            var polCol = go.AddComponent<PolygonCollider2D>();
+                            // set the path of the polygon collider
+                            polCol.SetPath(0, collisionObject.Points.Select(p => new Vector2((float)p.X, -(float)p.Y)/ tex.pixelsPerUnit).ToArray()); // we must convert the TmxPoints to Vector2s
+                            polCol.offset = new Vector2((float)collisionObject.X, (float)collisionObject.Y) / 2 / tex.pixelsPerUnit;
                         }
                     }
                 }
