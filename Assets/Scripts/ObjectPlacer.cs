@@ -46,14 +46,14 @@ public class ObjectPlacer : MonoBehaviour {
                     var tex = spriteList[tile.Gid];
                     var destx = tile.X * (map.TileWidth / tex.pixelsPerUnit);
                     var desty = -tile.Y * (map.TileWidth / tex.pixelsPerUnit);
-                    var go = addTileAsObject(tile, tex, destx, desty, layerindex);
+                    var go = addTileObject(tile, tex, destx, desty, layerindex);
                     if (go) go.transform.SetParent(lparent.transform);
                 }
             }
         }
     }
 
-    GameObject addTileAsObject(TmxLayerTile tile, Sprite tex, float x, float y, int orderInLayer = 0)
+    GameObject addTileObject(TmxLayerTile tile, Sprite tex, float x, float y, int orderInLayer = 0)
     {
         if (tile.Gid > 0)
         {
@@ -63,7 +63,7 @@ public class ObjectPlacer : MonoBehaviour {
             var sprend = go.AddComponent<SpriteRenderer>();
             sprend.sprite = tex;
             sprend.flipX = tile.HorizontalFlip;
-            sprend.flipX = tile.VerticalFlip;
+            sprend.flipY = tile.VerticalFlip;
             sprend.sortingOrder = orderInLayer;
 
             if (tileGidMap.ContainsKey(tile.Gid)) // if we have special information about that tile (such as collision information)
@@ -76,21 +76,27 @@ public class ObjectPlacer : MonoBehaviour {
                             var boxCol = go.AddComponent<BoxCollider2D>();
 
                             // Don't forget we have to convert from pixels to unity units!
-                            float width = (float)collisionObject.Width / tex.pixelsPerUnit;
+                            float width  = (float)collisionObject.Width / tex.pixelsPerUnit;
                             float height = (float)collisionObject.Height / tex.pixelsPerUnit;
-                            
-                            float centerXPos = (float)(collisionObject.X / tex.pixelsPerUnit);
-                            var centerYPos = (float)(-collisionObject.Y / tex.pixelsPerUnit); // the positive y cord in Tiled goes down so we have to flip it
 
-                            boxCol.offset = new Vector2(centerXPos, centerYPos);
+                            var centerXPos = (tile.HorizontalFlip ? -1 : 1) * (float)(collisionObject.X / tex.pixelsPerUnit);
+                            var centerYPos = (tile.VerticalFlip ? -1 : 1) * (float)(-collisionObject.Y / tex.pixelsPerUnit); // the positive y cord in Tiled goes down so we have to flip it
+
+                            boxCol.offset = new Vector2(centerXPos, centerYPos) / 2;
                             boxCol.size = new Vector2(width, height);
                         }
                         else if (collisionObject.ObjectType == TmxObjectType.Polygon) 
                         {
                             var polCol = go.AddComponent<PolygonCollider2D>();
+
                             // set the path of the polygon collider
-                            polCol.SetPath(0, collisionObject.Points.Select(p => new Vector2((float)p.X, -(float)p.Y)/ tex.pixelsPerUnit).ToArray()); // we must convert the TmxPoints to Vector2s
-                            polCol.offset = new Vector2((float)collisionObject.X, (float)collisionObject.Y) / 2 / tex.pixelsPerUnit;
+                            // we must convert the TmxPoints to Vector2s
+                            polCol.SetPath(0, collisionObject.Points.Select(p => new Vector2((tile.HorizontalFlip ? -1 : 1) * (float)p.X, 
+                                                                                             (tile.VerticalFlip ? -1 : 1) * -(float)p.Y)/ tex.pixelsPerUnit).ToArray()); 
+
+                            var XPos = (tile.HorizontalFlip ? -1 : 1) * (float)(collisionObject.X / tex.pixelsPerUnit);
+                            var YPos = (tile.VerticalFlip ? -1 : 1) * (float)(-collisionObject.Y / tex.pixelsPerUnit); // the positive y cord in Tiled goes down so we have to flip it
+                            polCol.offset = new Vector2(XPos, YPos) / 2;
                         }
                     }
                 }
@@ -100,6 +106,7 @@ public class ObjectPlacer : MonoBehaviour {
         }
         return null;
     }
+    
 
     TmxLayerTile getTmxTile(string layer, int gridLocationX, int gridLocationY)
     {

@@ -10,8 +10,9 @@ How to use:
 
 
 
-checklist
-empty tile support
-flipx, ✓ flipy, ✓ flipdiagonal support
-collision support
+checklist (order of importance)
+empty tile in tileset support
+flipx ✓, flipy ✓, flipdiagonal support
+collision support ✓
+Quickupdate
 Editor integration
