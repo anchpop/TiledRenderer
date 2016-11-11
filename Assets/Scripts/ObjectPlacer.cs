@@ -13,6 +13,7 @@ public class ObjectPlacer : MonoBehaviour {
     public bool flipY = true;
     //public List<Texture2D> sheets = new List<Texture2D>();
     List<Sprite> spriteList = new List<Sprite> { null };
+    Dictionary<int, TmxTilesetTile> tileGidMap = new Dictionary<int, TmxTilesetTile>();
     Dictionary<TmxLayerTile, GameObject> tileGameobjectMap = new Dictionary<TmxLayerTile, GameObject>();
     TmxMap map;
 
@@ -28,34 +29,70 @@ public class ObjectPlacer : MonoBehaviour {
         foreach (var tileSet in map.Tilesets)
         {
             spriteList.AddRange(Resources.LoadAll<Sprite>("Tilesheets/" + tileSet.Name));
+            foreach (var tile in tileSet.Tiles.Values)
+            {
+                tileGidMap[tile.Id + 1] = tile; // tile ids are always one lower than the tile Gid. yeah it's dumb
+            }
         }
 
-        foreach (var layer in map.Layers)
+        for (int layerindex = 0; layerindex < map.Layers.Count; layerindex++)
         {
-            foreach (var tile in layer.Tiles)
+            var lparent = new GameObject(map.Layers[layerindex].Name); // object to parent the tiles created under
+            lparent.transform.SetParent(transform);
+
+            foreach (var tile in map.Layers[layerindex].Tiles)
             {
-                var destx = tile.X * (map.TileWidth/spriteList[tile.Gid].pixelsPerUnit);
-                var desty = (flipY ? -1 : 1) * tile.Y * (map.TileWidth / spriteList[tile.Gid].pixelsPerUnit);
-                addTileAsObject(tile, destx, desty);
+                if (tile.Gid > 0)
+                {
+                    var tex = spriteList[tile.Gid];
+                    var destx = tile.X * (map.TileWidth / tex.pixelsPerUnit);
+                    var desty = (flipY ? -1 : 1) * tile.Y * (map.TileWidth / tex.pixelsPerUnit);
+                    var go = addTileAsObject(tile, tex, destx, desty, layerindex);
+                    if (go) go.transform.SetParent(lparent.transform);
+                }
             }
         }
     }
 
-    void addTileAsObject(TmxLayerTile tile, float x, float y)
+    GameObject addTileAsObject(TmxLayerTile tile, Sprite tex, float x, float y, int orderInLayer = 0)
     {
         if (tile.Gid > 0)
         {
             var go = new GameObject("Tile");
-            go.transform.SetParent(transform);
             go.transform.position = new Vector3(x, y, 0);
 
             var sprend = go.AddComponent<SpriteRenderer>();
-            sprend.sprite = spriteList[tile.Gid];
+            sprend.sprite = tex;
             sprend.flipX = tile.HorizontalFlip;
             sprend.flipX = tile.VerticalFlip;
+            sprend.sortingOrder = orderInLayer;
+
+            if (tileGidMap.ContainsKey(tile.Gid)) // if we have special information about that tile (such as collision information)
+                foreach (TmxObjectGroup oGroup in tileGidMap[tile.Gid].ObjectGroups)
+                {
+                    foreach (TmxObject collisionObject in oGroup.Objects)
+                    {
+                        if (collisionObject.ObjectType == TmxObjectType.Basic) // add a box collider, square object
+                        {
+                            var boxCol = go.AddComponent<BoxCollider2D>();
+
+                            // Don't forget we have to convert from pixels to unity units!
+                            float width = (float)collisionObject.Width / tex.pixelsPerUnit;
+                            float height = (float)collisionObject.Height / tex.pixelsPerUnit;
+                            // the X and Y positions are the top left, we need to convert to unity's center
+                            float centerXPos = (float)(collisionObject.X / tex.pixelsPerUnit);
+                            var centerYPos = (float)(collisionObject.X / tex.pixelsPerUnit);
+
+                            boxCol.offset = new Vector2(centerXPos, centerYPos);
+                            boxCol.size = new Vector2(width, height);
+                        }
+                    }
+                }
 
             tileGameobjectMap[tile] = go;
+            return go;
         }
+        return null;
     }
 
     TmxLayerTile getTmxTile(string layer, int gridLocationX, int gridLocationY)
