@@ -5,10 +5,16 @@ using System.Collections;
 using System.Collections.Generic;
 using TiledSharp;
 
+/*[Serializable]
+public struct TilesetFiles
+{
+    public Texture2D tilesetTexture;
+    public int horisontalTiles;
+    public int verticalTiles;
+}*/ // This part is a work in progress designed to make it so the tilesets don't need to be in the resources folder and blank tiles aren't ignored
 
-
-public class ObjectPlacer : MonoBehaviour {
-
+public class ObjectPlacer : MonoBehaviour
+{
     public bool createMapOnAwake = true;
     //public List<Texture2D> sheets = new List<Texture2D>();
     List<Sprite> spriteList = new List<Sprite> { null };
@@ -28,8 +34,11 @@ public class ObjectPlacer : MonoBehaviour {
         foreach (var tileSet in map.Tilesets)
         {
             spriteList.AddRange(Resources.LoadAll<Sprite>("Tilesheets/" + tileSet.Name));
+
+            //var texture = tilesets.Find(c => c.tilesetTexture.name == tileSet.Name);
             foreach (var tile in tileSet.Tiles.Values)
             {
+                //spriteList.Add(texture, new Rect(), new Vector2(0.5f, 0.5f));
                 tileGidMap[tile.Id + 1] = tile; // tile ids are always one lower than the tile Gid. yeah it's dumb
             }
         }
@@ -57,13 +66,24 @@ public class ObjectPlacer : MonoBehaviour {
     {
         if (tile.Gid > 0)
         {
+            // determine whether we should flip horisontally, flip vertically, or rotate 90 degrees
+            bool flipX = tile.HorizontalFlip;
+            bool flipY = tile.VerticalFlip;
+            bool rotate90 = tile.DiagonalFlip;
+            if (rotate90)
+            {
+                Swap(ref flipX, ref flipY);
+                flipX = !flipX;
+            }
+            
             var go = new GameObject("Tile");
             go.transform.position = new Vector3(x, y, 0);
+            go.transform.Rotate(new Vector3(0, 0, rotate90 ? 90 : 0));
 
             var sprend = go.AddComponent<SpriteRenderer>();
             sprend.sprite = tex;
-            sprend.flipX = tile.HorizontalFlip;
-            sprend.flipY = tile.VerticalFlip;
+            sprend.flipX = flipX;
+            sprend.flipY = flipY;
             sprend.sortingOrder = orderInLayer;
 
             if (tileGidMap.ContainsKey(tile.Gid)) // if we have special information about that tile (such as collision information)
@@ -79,10 +99,10 @@ public class ObjectPlacer : MonoBehaviour {
                             float width  = (float)collisionObject.Width / tex.pixelsPerUnit;
                             float height = (float)collisionObject.Height / tex.pixelsPerUnit;
 
-                            var centerXPos = (tile.HorizontalFlip ? -1 : 1) * (float)(collisionObject.X / tex.pixelsPerUnit);
-                            var centerYPos = (tile.VerticalFlip ? -1 : 1) * (float)(-collisionObject.Y / tex.pixelsPerUnit); // the positive y cord in Tiled goes down so we have to flip it
+                            var centerXPos = (flipX ? -1 : 1) * ( collisionObject.X * 2 + collisionObject.Width - map.TileWidth)  / tex.pixelsPerUnit;
+                            var centerYPos = (flipY ? -1 : 1) * -( collisionObject.Y * 2 + collisionObject.Height - map.TileHeight)  / tex.pixelsPerUnit; // the positive y cord in Tiled goes down so we have to flip it
 
-                            boxCol.offset = new Vector2(centerXPos, centerYPos) / 2;
+                            boxCol.offset = new Vector2((float)centerXPos, (float)centerYPos) / 2;
                             boxCol.size = new Vector2(width, height);
                         }
                         else if (collisionObject.ObjectType == TmxObjectType.Polygon) 
@@ -91,15 +111,17 @@ public class ObjectPlacer : MonoBehaviour {
 
                             // set the path of the polygon collider
                             // we must convert the TmxPoints to Vector2s
-                            polCol.SetPath(0, collisionObject.Points.Select(p => new Vector2((tile.HorizontalFlip ? -1 : 1) * (float)p.X, 
-                                                                                             (tile.VerticalFlip ? -1 : 1) * -(float)p.Y)/ tex.pixelsPerUnit).ToArray()); 
+                            var XPos = (flipX ? -1 : 1) * (float)(collisionObject.X - map.TileWidth/2 );
+                            var YPos = (flipY ? -1 : 1) * -(float)(collisionObject.Y - map.TileHeight/2); // the positive y cord in Tiled goes down so we have to flip it
 
-                            var XPos = (tile.HorizontalFlip ? -1 : 1) * (float)(collisionObject.X / tex.pixelsPerUnit);
-                            var YPos = (tile.VerticalFlip ? -1 : 1) * (float)(-collisionObject.Y / tex.pixelsPerUnit); // the positive y cord in Tiled goes down so we have to flip it
-                            polCol.offset = new Vector2(XPos, YPos) / 2;
+                            polCol.SetPath(0, collisionObject.Points.Select(p => new Vector2( (flipX ? -1 : 1) * ((float)p.X), 
+                                                                                              (flipY ? -1 : 1) * -((float)p.Y) ) / tex.pixelsPerUnit).ToArray()); 
+
+                            polCol.offset = new Vector2(XPos, YPos) / tex.pixelsPerUnit;
                         }
                     }
                 }
+
 
             tileGameobjectMap[tile] = go;
             return go;
@@ -116,6 +138,13 @@ public class ObjectPlacer : MonoBehaviour {
     GameObject getTile(string layer, int gridLocationX, int gridLocationY)
     {
         return tileGameobjectMap[map.Layers[layer].Tiles.ToList().Find(t => t.X == gridLocationX && t.Y == gridLocationY)];
+    }
+
+    public static void Swap<T>(ref T lhs, ref T rhs)
+    {
+        T temp = lhs;
+        lhs = rhs;
+        rhs = temp;
     }
 
 
