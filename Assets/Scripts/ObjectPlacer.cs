@@ -36,7 +36,13 @@ public class ObjectPlacer : MonoBehaviour
 
     public void createTilemap()
     {
-        StartCoroutine(RenderMap("File://" + Path.Combine(Application.streamingAssetsPath, TmxPath)));
+        var url = Path.Combine(Application.streamingAssetsPath, TmxPath);
+
+        #if UNITY_EDITOR || !UNITY_ANDROID
+           url = "file://" + url; 
+        #endif
+
+        StartCoroutine(RenderMap(url));
     }
 
     IEnumerator RenderMap(string path)
