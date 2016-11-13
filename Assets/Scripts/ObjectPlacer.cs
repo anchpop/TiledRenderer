@@ -138,8 +138,8 @@ public class ObjectPlacer : MonoBehaviour
 
                             // set the path of the polygon collider
                             // we must convert the TmxPoints to Vector2s
-                            var XPos = (flipX ? -1 : 1) * (float)(collisionObject.X - map.TileWidth/2 );
-                            var YPos = (flipY ? -1 : 1) * -(float)(collisionObject.Y - map.TileHeight/2); // the positive y cord in Tiled goes down so we have to flip it
+                            var XPos = (flipX ? -1 : 1) *  (float)(collisionObject.X - map.TileWidth  / 2);
+                            var YPos = (flipY ? -1 : 1) * -(float)(collisionObject.Y - map.TileHeight / 2); // the positive y cord in Tiled goes down so we have to flip it
 
                             polCol.SetPath(0, collisionObject.Points.Select(p => new Vector2( (flipX ? -1 : 1) * ((float)p.X), 
                                                                                               (flipY ? -1 : 1) * -((float)p.Y) ) / tex.pixelsPerUnit).ToArray()); 
@@ -156,28 +156,53 @@ public class ObjectPlacer : MonoBehaviour
         return null;
     }
     
-    public Vector2 getTilePosFromWorldPos(Vector3 point)
+    public Vector2 convertWorldPosToTilePos(Vector3 point)
     {
         Vector3 p = (point - transform.position) * pixelsPerUnit;
-        return new Vector3(Mathf.Floor(p.x), Mathf.Floor(p.y), 0); // Round the vector to get those nice integer values
+        return new Vector3(Mathf.Floor(p.x / map.TileWidth), Mathf.Floor(p.y / map.TileHeight), 0); // Round the vector to get those nice integer values
     }
-
     public TmxLayer getTmxLayer(string layer)
     {
         return map.Layers[layer];
     }
 
+
+    public Dictionary<string, string> getLayerProperties(string layer)
+    {
+        return getTmxLayer(layer).Properties;
+    }
+    public Dictionary<string, string> getTileProperties(string layer, Vector3 gridlocation)
+    {
+        return getTileProperties(layer, (int)Mathf.Floor(gridlocation.x), (int)Mathf.Floor(gridlocation.y));
+    }
+    public Dictionary<string, string> getTileProperties(string layer, int gridLocationX, int gridLocationY)
+    {
+        if (tileIdMap.ContainsKey(getTmxTile(layer, gridLocationX, gridLocationY).Gid)) return tileIdMap[getTmxTile(layer, gridLocationX, gridLocationY).Gid].Properties;
+        else return new Dictionary<string, string>();
+    }
+
+
+
+    public TmxLayerTile getTmxTile(string layer, Vector3 gridlocation)
+    {
+        return getTmxTile(layer, (int)Mathf.Floor(gridlocation.x), (int)Mathf.Floor(gridlocation.y));
+    }
     public TmxLayerTile getTmxTile(string layer, int gridLocationX, int gridLocationY)
     {
         return getTmxLayer(layer).Tiles.ToList().Find(t => t.X == gridLocationX && t.Y == gridLocationY);
     }
 
-    public GameObject getTile(string layer, int gridLocationX, int gridLocationY)
+
+    public GameObject getTileObject(string layer, Vector3 gridlocation)
+    {
+        return getTileObject(layer, (int)Mathf.Floor(gridlocation.x), (int)Mathf.Floor(gridlocation.y));
+    }
+    public GameObject getTileObject(string layer, int gridLocationX, int gridLocationY)
     {
         return tileGameobjectMap[map.Layers[layer].Tiles.ToList().Find(t => t.X == gridLocationX && t.Y == gridLocationY)];
     }
 
-    public static void Swap<T>(ref T lhs, ref T rhs)
+    static void Swap<T>(ref T lhs, ref T rhs)
     {
         T temp = lhs;
         lhs = rhs;

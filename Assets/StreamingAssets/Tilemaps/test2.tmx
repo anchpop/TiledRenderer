@@ -111,7 +111,7 @@
 </data>
  </layer>
  <objectgroup name="Object Layer 1"/>
- <layer name="Tile Layer 3" width="20" height="20">
+ <layer name="Ignored Layer" width="20" height="20">
   <properties>
    <property name="ignore" value="true"/>
   </properties>

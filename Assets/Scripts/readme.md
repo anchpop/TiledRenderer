@@ -12,12 +12,12 @@ Tips:
 To ignore a layer or tile, add the custom property of "ignore" and set it to "true".
 
 Roadmap (order of importance)
-android/webplayer/uwp integration ✓
-flipx, flipy, flipdiagonal support ✓
-collision support ✓
-empty tile in tileset support
-prefab creation
-tile ignoring ✓
-Quickupdate
-Editor integration
-check-what-tile-im-in support ✓
+✓ android/webplayer/uwp integration (still need to test)  
+✓ flipx, flipy, flipdiagonal support  
+✓ collision support    
+empty tile in tileset support  
+prefab creation  
+✓ tile ignoring  
+✓ helper functions (get tile properties, get tile form world position, etc.)  
+Quickupdate  
+Editor integration  
