@@ -151,6 +151,22 @@ public class ObjectPlacer : MonoBehaviour
                             if (collisionObject.Properties.ContainsKey("isTrigger") && collisionObject.Properties["isTrigger"].ToLower() == "true")
                                 polCol.isTrigger = true;
                         }
+                        else if (collisionObject.ObjectType == TmxObjectType.Polyline)
+                        {
+                            var edgeCol = go.AddComponent<EdgeCollider2D>();
+
+                            // set the path of the polygon collider
+                            // we must convert the TmxPoints to Vector2s
+                            var XPos = (flipX ? -1 : 1) * (float)(collisionObject.X - map.TileWidth / 2);
+                            var YPos = (flipY ? -1 : 1) * -(float)(collisionObject.Y - map.TileHeight / 2); // the positive y cord in Tiled goes down so we have to flip it
+
+                            edgeCol.points = collisionObject.Points.Select(p => new Vector2((flipX ? -1 : 1) * ((float)p.X),
+                                                                                              (flipY ? -1 : 1) * -((float)p.Y)) / tex.pixelsPerUnit).ToArray();
+
+                            edgeCol.offset = new Vector2(XPos, YPos) / tex.pixelsPerUnit;
+                            if (collisionObject.Properties.ContainsKey("isTrigger") && collisionObject.Properties["isTrigger"].ToLower() == "true")
+                                edgeCol.isTrigger = true;
+                        }
                     }
                 }
 
