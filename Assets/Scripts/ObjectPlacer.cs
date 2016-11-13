@@ -1,8 +1,10 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Linq;
 using TiledSharp;
 
 /*[Serializable]
@@ -15,6 +17,7 @@ public struct TilesetFiles
 
 public class ObjectPlacer : MonoBehaviour
 {
+    public string TmxPath;   
     public bool createMapOnAwake = true;
     //public List<Texture2D> sheets = new List<Texture2D>();
     List<Sprite> spriteList = new List<Sprite> { null };
@@ -23,12 +26,24 @@ public class ObjectPlacer : MonoBehaviour
     TmxMap map;
 
     void Start () {
-        if (createMapOnAwake) RenderMap("Assets/Resources/Tilemaps/test2.tmx");
+        if (createMapOnAwake) createTilemap();
     }
 
-    public void RenderMap(string path)
+    public void createTilemap(string path)
     {
-        map = new TmxMap(path);
+        StartCoroutine(RenderMap(path));
+    }
+
+    public void createTilemap()
+    {
+        StartCoroutine(RenderMap("File://" + Path.Combine(Application.streamingAssetsPath, TmxPath)));
+    }
+
+    IEnumerator RenderMap(string path)
+    {
+        var tmx = new WWW(path);
+        yield return tmx;
+        map = new TmxMap(XDocument.Parse(tmx.text));
 
 
         foreach (var tileSet in map.Tilesets)

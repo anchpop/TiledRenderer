@@ -11,8 +11,9 @@ How to use:
 
 
 checklist (order of importance)
+android/webplayer/uwp integration
 empty tile in tileset support
-flipx ✓, flipy ✓, flipdiagonal support
+flipx ✓, flipy ✓, flipdiagonal support ✓
 collision support ✓
 Quickupdate
 Editor integration
