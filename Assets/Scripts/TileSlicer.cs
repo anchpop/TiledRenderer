@@ -11,6 +11,7 @@ class TileSlicer
 
     public TileSlicer(Texture2D tex, int tileWidth, int tileHeight, int padding, int margin)
     {
+        tex.filterMode = FilterMode.Point;
         int tilesWide = Mathf.FloorToInt((tex.width  - margin * 2) / (tileWidth  + padding)); 
         int tilesTall = Mathf.FloorToInt((tex.height - margin * 2) / (tileHeight + padding));
 

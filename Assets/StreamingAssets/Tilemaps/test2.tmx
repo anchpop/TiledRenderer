@@ -53,6 +53,11 @@
     <property name="ignore" value="true"/>
    </properties>
   </tile>
+  <tile id="584">
+   <properties>
+    <property name="basePrefab" value="TestBaseGameobject"/>
+   </properties>
+  </tile>
   <tile id="641">
    <properties>
     <property name="test" value=""/>

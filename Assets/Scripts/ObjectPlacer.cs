@@ -13,6 +13,8 @@ public class ObjectPlacer : MonoBehaviour
     public bool createMapOnAwake = true;
     public float pixelsPerUnit = -1;
     public List<Texture2D> tileSheets = new List<Texture2D>();
+    public List<GameObject> prefabs = new List<GameObject>();
+
     List<Sprite> spriteList = new List<Sprite> { null };
     Dictionary<int, TmxTilesetTile> tileIdMap = new Dictionary<int, TmxTilesetTile>();
     Dictionary<TmxLayerTile, GameObject> tileGameobjectMap = new Dictionary<TmxLayerTile, GameObject>();
@@ -32,7 +34,7 @@ public class ObjectPlacer : MonoBehaviour
     {
         var url = Path.Combine(Application.streamingAssetsPath, TmxPath);
 
-        #if UNITY_EDITOR || !UNITY_ANDROID // android doesn't need "file://" added because Application.streamingAssetsPath comes with "file:"
+        #if UNITY_EDITOR || !UNITY_ANDROID // Android doesn't need "file://" added because Application.streamingAssetsPath comes with "file:"
            url = "file://" + url; 
         #endif
 
@@ -47,7 +49,7 @@ public class ObjectPlacer : MonoBehaviour
 
         if (map.Orientation != OrientationType.Orthogonal) throw new System.Exception("Modes other than Orthagonal are not supported at this time");  
 
-        foreach (var tileSet in map.Tilesets)
+        foreach (var tileSet in map.Tilesets) // we need to get the tilesheets, slice them up into sprites, and put them in spriteList
         {
             var sheets = tileSheets.Where(c => c.name == tileSet.Name).ToList();
             if (sheets.Count == 0) throw new System.Exception("Couldn't find tileset " + tileSet.Name + " in the tileSheets list");
@@ -101,11 +103,11 @@ public class ObjectPlacer : MonoBehaviour
                 flipX = !flipX;
             }
             
-            var go = new GameObject("Tile");
+            var go = getBaseGameobject(tile);
             go.transform.position = new Vector3(x, y, 0);
             go.transform.Rotate(new Vector3(0, 0, rotate90 ? 90 : 0));
 
-            var sprend = go.AddComponent<SpriteRenderer>();
+            var sprend = go.GetComponent<SpriteRenderer>();
             sprend.sprite = tex;
             sprend.flipX = flipX;
             sprend.flipY = flipY;
@@ -159,13 +161,33 @@ public class ObjectPlacer : MonoBehaviour
         return null;
     }
     
+    GameObject getBaseGameobject(TmxLayerTile tile)
+    {
+        GameObject go = null;
+        if (tileIdMap.ContainsKey(tile.Gid) && tileIdMap[tile.Gid].Properties.ContainsKey("basePrefab"))
+        {
+            var fabs = prefabs.Where(p => p.name == tileIdMap[tile.Gid].Properties["basePrefab"]).ToList();
+            if (fabs.Count != 0)
+            {
+                go = Instantiate(fabs.First());
+            }
+        }
+        else
+        {
+            go = new GameObject("Tile");
+        }
+        if (go.GetComponent<SpriteRenderer>() == null)
+            go.AddComponent<SpriteRenderer>();
+        
+        return go;
+    }
+
 
 
     public TmxLayer getTmxLayer(string layer)
     {
         return map.Layers[layer];
     }
-
 
     public Vector2 convertWorldPosToTilePos(Vector3 point)
     {
