@@ -12,13 +12,16 @@ Tips:
 To ignore a layer or tile, add the custom property of "ignore" and set it to "true".
 
 Roadmap (order of importance)
-✓ android/webplayer/uwp integration (still need to test)  
-✓ flipx, flipy, flipdiagonal support  
-✓ collision support    
-empty tile in tileset support  
-prefab creation  
-✓ tile ignoring  
-✓ helper functions (get tile properties, get tile form world position, etc.)  
+✓ Android/webplayer/uwp integration (still need to test)  
+✓ Flipx, flipy, flipdiagonal support  
+✓ Polygon collision support    
+✓ Box collision support    
+✓ Trigger colliders    
+Polyline collision support    
+✓ Empty tile in tileset support  
+Prefab creation  
+✓ Tile ignoring  
+✓ Helper functions (get tile properties, get tile form world position, etc.)  
 Quickupdate  
 Editor integration  
 Support for Hexagonal, Isometric, and Staggered

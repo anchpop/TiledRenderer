@@ -7,20 +7,12 @@ using System.Collections.Generic;
 using System.Xml.Linq;
 using TiledSharp;
 
-/*[Serializable]
-public struct TilesetFiles
-{
-    public Texture2D tilesetTexture;
-    public int horisontalTiles;
-    public int verticalTiles;
-}*/ // This part is a work in progress designed to make it so the tilesets don't need to be in the resources folder and blank tiles aren't ignored
-
 public class ObjectPlacer : MonoBehaviour
 {
     public string TmxPath;
     public bool createMapOnAwake = true;
     public float pixelsPerUnit = -1;
-    //public List<Texture2D> sheets = new List<Texture2D>();
+    public List<Texture2D> tileSheets = new List<Texture2D>();
     List<Sprite> spriteList = new List<Sprite> { null };
     Dictionary<int, TmxTilesetTile> tileIdMap = new Dictionary<int, TmxTilesetTile>();
     Dictionary<TmxLayerTile, GameObject> tileGameobjectMap = new Dictionary<TmxLayerTile, GameObject>();
@@ -40,7 +32,7 @@ public class ObjectPlacer : MonoBehaviour
     {
         var url = Path.Combine(Application.streamingAssetsPath, TmxPath);
 
-        #if UNITY_EDITOR || !UNITY_ANDROID
+        #if UNITY_EDITOR || !UNITY_ANDROID // android doesn't need "file://" added because Application.streamingAssetsPath comes with "file:"
            url = "file://" + url; 
         #endif
 
@@ -53,11 +45,15 @@ public class ObjectPlacer : MonoBehaviour
         yield return tmx;
         map = new TmxMap(XDocument.Parse(tmx.text));
 
-        if (map.Orientation != OrientationType.Orthogonal) throw new System.Exception("Modes other than Orthagonal are not supported at this time"); 
+        if (map.Orientation != OrientationType.Orthogonal) throw new System.Exception("Modes other than Orthagonal are not supported at this time");  
 
         foreach (var tileSet in map.Tilesets)
         {
-            spriteList.AddRange(Resources.LoadAll<Sprite>("Tilesheets/" + tileSet.Name));
+            var sheets = tileSheets.Where(c => c.name == tileSet.Name).ToList();
+            if (sheets.Count == 0) throw new System.Exception("Couldn't find tileset " + tileSet.Name + " in the tileSheets list");
+
+            var slicer = new TileSlicer(sheets.First(), tileSet.TileWidth, tileSet.TileHeight, tileSet.Spacing);
+            spriteList.AddRange(slicer.sprites);
 
             if (pixelsPerUnit == -1) pixelsPerUnit = spriteList[spriteList.Count - 1].pixelsPerUnit; // if PixelsPerUnit hasn't been changed by the user, we just guess
             
@@ -66,6 +62,7 @@ public class ObjectPlacer : MonoBehaviour
                 tileIdMap[tile.Id + 1] = tile; // tileset ids are always one lower than the tilemap Gid. yeah it's dumb
             }
         }
+
 
         for (int layerindex = 0; layerindex < map.Layers.Count; layerindex++)
         {
@@ -132,6 +129,9 @@ public class ObjectPlacer : MonoBehaviour
 
                             boxCol.offset = new Vector2((float)centerXPos, (float)centerYPos) / 2;
                             boxCol.size = new Vector2(width, height);
+
+                            if (collisionObject.Properties.ContainsKey("isTrigger") && collisionObject.Properties["isTrigger"].ToLower() == "true")
+                                boxCol.isTrigger = true;
                         }
                         else if (collisionObject.ObjectType == TmxObjectType.Polygon) 
                         {
@@ -146,6 +146,8 @@ public class ObjectPlacer : MonoBehaviour
                                                                                               (flipY ? -1 : 1) * -((float)p.Y) ) / tex.pixelsPerUnit).ToArray()); 
 
                             polCol.offset = new Vector2(XPos, YPos) / tex.pixelsPerUnit;
+                            if (collisionObject.Properties.ContainsKey("isTrigger") && collisionObject.Properties["isTrigger"].ToLower() == "true")
+                                polCol.isTrigger = true;
                         }
                     }
                 }
@@ -157,6 +159,8 @@ public class ObjectPlacer : MonoBehaviour
         return null;
     }
     
+
+
     public TmxLayer getTmxLayer(string layer)
     {
         return map.Layers[layer];
@@ -176,7 +180,7 @@ public class ObjectPlacer : MonoBehaviour
     }
     public Dictionary<string, string> getTileProperties(string layer, Vector3 gridlocation)
     {
-        return getTileProperties(layer, (int)Mathf.Floor(gridlocation.x), (int)Mathf.Floor(gridlocation.y));
+        return getTileProperties(layer, Mathf.FloorToInt(gridlocation.x), Mathf.FloorToInt(gridlocation.y));
     }
     public Dictionary<string, string> getTileProperties(string layer, int gridLocationX, int gridLocationY)
     {
@@ -188,7 +192,7 @@ public class ObjectPlacer : MonoBehaviour
 
     public TmxLayerTile getTmxTile(string layer, Vector3 gridlocation)
     {
-        return getTmxTile(layer, (int)Mathf.Floor(gridlocation.x), (int)Mathf.Floor(gridlocation.y));
+        return getTmxTile(layer, Mathf.FloorToInt(gridlocation.x), Mathf.FloorToInt(gridlocation.y));
     }
     public TmxLayerTile getTmxTile(string layer, int gridLocationX, int gridLocationY)
     {
@@ -198,7 +202,7 @@ public class ObjectPlacer : MonoBehaviour
 
     public GameObject getTileObject(string layer, Vector3 gridlocation)
     {
-        return getTileObject(layer, (int)Mathf.Floor(gridlocation.x), (int)Mathf.Floor(gridlocation.y));
+        return getTileObject(layer, Mathf.FloorToInt(gridlocation.x), Mathf.FloorToInt(gridlocation.y));
     }
     public GameObject getTileObject(string layer, int gridLocationX, int gridLocationY)
     {
