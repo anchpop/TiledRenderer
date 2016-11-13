@@ -108,7 +108,7 @@ public class ObjectPlacer : MonoBehaviour
             go.transform.Rotate(new Vector3(0, 0, rotate90 ? 90 : 0));
 
             var sprend = go.GetComponent<SpriteRenderer>();
-            sprend.sprite = tex;
+            if (sprend.sprite == null) sprend.sprite = tex;
             sprend.flipX = flipX;
             sprend.flipY = flipY;
             sprend.sortingOrder = orderInLayer;
@@ -168,14 +168,13 @@ public class ObjectPlacer : MonoBehaviour
         {
             var fabs = prefabs.Where(p => p.name == tileIdMap[tile.Gid].Properties["basePrefab"]).ToList();
             if (fabs.Count != 0)
-            {
                 go = Instantiate(fabs.First());
-            }
+            else
+                go = new GameObject("Tile");
         }
         else
-        {
             go = new GameObject("Tile");
-        }
+            
         if (go.GetComponent<SpriteRenderer>() == null)
             go.AddComponent<SpriteRenderer>();
         
