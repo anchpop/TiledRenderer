@@ -17,12 +17,14 @@ public struct TilesetFiles
 
 public class ObjectPlacer : MonoBehaviour
 {
-    public string TmxPath;   
+    public string TmxPath;
     public bool createMapOnAwake = true;
+    public float pixelsPerUnit = -1;
     //public List<Texture2D> sheets = new List<Texture2D>();
     List<Sprite> spriteList = new List<Sprite> { null };
-    Dictionary<int, TmxTilesetTile> tileGidMap = new Dictionary<int, TmxTilesetTile>();
+    Dictionary<int, TmxTilesetTile> tileIdMap = new Dictionary<int, TmxTilesetTile>();
     Dictionary<TmxLayerTile, GameObject> tileGameobjectMap = new Dictionary<TmxLayerTile, GameObject>();
+
     TmxMap map;
 
     void Start () {
@@ -56,28 +58,32 @@ public class ObjectPlacer : MonoBehaviour
         {
             spriteList.AddRange(Resources.LoadAll<Sprite>("Tilesheets/" + tileSet.Name));
 
-            //var texture = tilesets.Find(c => c.tilesetTexture.name == tileSet.Name);
+            if (pixelsPerUnit == -1) pixelsPerUnit = spriteList[spriteList.Count - 1].pixelsPerUnit; // if PixelsPerUnit hasn't been changed by the user, we just guess
+            
             foreach (var tile in tileSet.Tiles.Values)
             {
-                //spriteList.Add(texture, new Rect(), new Vector2(0.5f, 0.5f));
-                tileGidMap[tile.Id + 1] = tile; // tile ids are always one lower than the tile Gid. yeah it's dumb
+                tileIdMap[tile.Id + 1] = tile; // tileset ids are always one lower than the tilemap Gid. yeah it's dumb
             }
         }
 
         for (int layerindex = 0; layerindex < map.Layers.Count; layerindex++)
         {
-            var lparent = new GameObject(map.Layers[layerindex].Name); // object to parent the tiles created under
-            lparent.transform.SetParent(transform);
-
-            foreach (var tile in map.Layers[layerindex].Tiles)
+            var layer = map.Layers[layerindex];
+            if (!(layer.Properties.ContainsKey("ignore") && layer.Properties["ignore"].ToLower() == "true")) // if they've opted to ignore the layer
             {
-                if (tile.Gid > 0)
+                var lparent = new GameObject(layer.Name); // object to parent the tiles created under
+                lparent.transform.SetParent(transform);
+
+                foreach (var tile in layer.Tiles)
                 {
-                    var tex = spriteList[tile.Gid];
-                    var destx = tile.X * (map.TileWidth / tex.pixelsPerUnit);
-                    var desty = -tile.Y * (map.TileWidth / tex.pixelsPerUnit);
-                    var go = addTileObject(tile, tex, destx, desty, layerindex);
-                    if (go) go.transform.SetParent(lparent.transform);
+                    if (tile.Gid > 0 && !(tileIdMap.ContainsKey(tile.Gid) && tileIdMap[tile.Gid].Properties.ContainsKey("ignore") && tileIdMap[tile.Gid].Properties["ignore"].ToLower() == "true"))
+                    {
+                        var tex = spriteList[tile.Gid];
+                        var destx = tile.X * (map.TileWidth / pixelsPerUnit);
+                        var desty = -tile.Y * (map.TileWidth / pixelsPerUnit);
+                        var go = addTileObject(tile, tex, destx, desty, layerindex);
+                        if (go) go.transform.SetParent(lparent.transform);
+                    }
                 }
             }
         }
@@ -107,8 +113,8 @@ public class ObjectPlacer : MonoBehaviour
             sprend.flipY = flipY;
             sprend.sortingOrder = orderInLayer;
 
-            if (tileGidMap.ContainsKey(tile.Gid)) // if we have special information about that tile (such as collision information)
-                foreach (TmxObjectGroup oGroup in tileGidMap[tile.Gid].ObjectGroups)
+            if (tileIdMap.ContainsKey(tile.Gid)) // if we have special information about that tile (such as collision information)
+                foreach (TmxObjectGroup oGroup in tileIdMap[tile.Gid].ObjectGroups)
                 {
                     foreach (TmxObject collisionObject in oGroup.Objects)
                     {
@@ -150,13 +156,23 @@ public class ObjectPlacer : MonoBehaviour
         return null;
     }
     
-
-    TmxLayerTile getTmxTile(string layer, int gridLocationX, int gridLocationY)
+    public Vector2 getTilePosFromWorldPos(Vector3 point)
     {
-        return map.Layers[layer].Tiles.ToList().Find(t => t.X == gridLocationX && t.Y == gridLocationY);
+        Vector3 p = (point - transform.position) * pixelsPerUnit;
+        return new Vector3(Mathf.Floor(p.x), Mathf.Floor(p.y), 0); // Round the vector to get those nice integer values
     }
 
-    GameObject getTile(string layer, int gridLocationX, int gridLocationY)
+    public TmxLayer getTmxLayer(string layer)
+    {
+        return map.Layers[layer];
+    }
+
+    public TmxLayerTile getTmxTile(string layer, int gridLocationX, int gridLocationY)
+    {
+        return getTmxLayer(layer).Tiles.ToList().Find(t => t.X == gridLocationX && t.Y == gridLocationY);
+    }
+
+    public GameObject getTile(string layer, int gridLocationX, int gridLocationY)
     {
         return tileGameobjectMap[map.Layers[layer].Tiles.ToList().Find(t => t.X == gridLocationX && t.Y == gridLocationY)];
     }

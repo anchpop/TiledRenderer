@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" orientation="orthogonal" renderorder="right-down" width="20" height="20" tilewidth="16" tileheight="16" nextobjectid="1">
  <tileset firstgid="1" name="roguelikeSheet_transparent" tilewidth="16" tileheight="16" spacing="1" tilecount="1767" columns="57">
-  <image source="../TileSheets/roguelikeSheet_transparent.png" width="968" height="526"/>
+  <image source="../../Resources/TileSheets/roguelikeSheet_transparent.png" width="968" height="526"/>
+  <terraintypes>
+   <terrain name="Water" tile="60"/>
+   <terrain name="" tile="-1"/>
+  </terraintypes>
+  <tile id="2" terrain=",,,0"/>
+  <tile id="3" terrain=",,0,0"/>
+  <tile id="4" terrain=",,0,"/>
   <tile id="7">
    <objectgroup draworder="index">
     <object id="1" x="12" y="-0.5" width="4.3125" height="15.8125"/>
@@ -18,10 +25,26 @@
     <object id="2" x="0.9375" y="3.9375" width="2" height="2"/>
    </objectgroup>
   </tile>
+  <tile id="59" terrain=",0,,0"/>
+  <tile id="60" terrain="0,0,0,0"/>
+  <tile id="61" terrain="0,,0,"/>
   <tile id="64">
    <objectgroup draworder="index">
     <object id="1" x="-0.125" y="0.125" width="16.0625" height="15.75"/>
    </objectgroup>
+  </tile>
+  <tile id="116" terrain=",0,,"/>
+  <tile id="117" terrain="0,0,,"/>
+  <tile id="118" terrain="0,,,"/>
+  <tile id="180">
+   <properties>
+    <property name="ignore" value="true"/>
+   </properties>
+  </tile>
+  <tile id="463">
+   <properties>
+    <property name="ignore" value="true"/>
+   </properties>
   </tile>
   <tile id="641">
    <properties>
@@ -43,8 +66,8 @@
   <data encoding="csv">
 6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
 6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+6,6,6,6,7,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+6,6,6,6,7,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
 6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
 6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
 6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
@@ -81,11 +104,38 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,181,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,181,0,0,181,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,181,181,181,181,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <objectgroup name="Object Layer 1"/>
+ <layer name="Tile Layer 3" width="20" height="20">
+  <properties>
+   <property name="ignore" value="true"/>
+  </properties>
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,464,464,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,464,464,464,464,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,464,464,464,464,464,464,464,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,464,0,464,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,464,0,464,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,464,464,464,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup name="Object Layer 1"/>
 </map>
