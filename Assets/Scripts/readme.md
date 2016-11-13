@@ -9,14 +9,15 @@ How to use:
 4. Add the tilemap script to the Gameobject whose parent you want the tile objects to be!
 
 Tips:
-To ignore a layer or tile, add the custom property of "ignore" and set it to "true". 
+To ignore a layer or tile, add the custom property of "ignore" and set it to "true".
 
-checklist (order of importance)
-prefab creation
-check-what-tile-im-in support
+Roadmap (order of importance)
 android/webplayer/uwp integration ✓
-empty tile in tileset support
-flipx ✓, flipy ✓, flipdiagonal support ✓
+flipx, flipy, flipdiagonal support ✓
 collision support ✓
+empty tile in tileset support
+prefab creation
+tile ignoring ✓
 Quickupdate
 Editor integration
+check-what-tile-im-in support ✓
