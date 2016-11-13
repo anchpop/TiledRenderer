@@ -21,3 +21,5 @@ prefab creation
 ✓ helper functions (get tile properties, get tile form world position, etc.)  
 Quickupdate  
 Editor integration  
+Support for Hexagonal, Isometric, and Staggered
+Render Order

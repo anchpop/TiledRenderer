@@ -53,6 +53,7 @@ public class ObjectPlacer : MonoBehaviour
         yield return tmx;
         map = new TmxMap(XDocument.Parse(tmx.text));
 
+        if (map.Orientation != OrientationType.Orthogonal) throw new System.Exception("Modes other than Orthagonal are not supported at this time"); 
 
         foreach (var tileSet in map.Tilesets)
         {
@@ -156,14 +157,16 @@ public class ObjectPlacer : MonoBehaviour
         return null;
     }
     
+    public TmxLayer getTmxLayer(string layer)
+    {
+        return map.Layers[layer];
+    }
+
+
     public Vector2 convertWorldPosToTilePos(Vector3 point)
     {
         Vector3 p = (point - transform.position) * pixelsPerUnit;
         return new Vector3(Mathf.Floor(p.x / map.TileWidth), Mathf.Floor(p.y / map.TileHeight), 0); // Round the vector to get those nice integer values
-    }
-    public TmxLayer getTmxLayer(string layer)
-    {
-        return map.Layers[layer];
     }
 
 
@@ -201,6 +204,7 @@ public class ObjectPlacer : MonoBehaviour
     {
         return tileGameobjectMap[map.Layers[layer].Tiles.ToList().Find(t => t.X == gridLocationX && t.Y == gridLocationY)];
     }
+
 
     static void Swap<T>(ref T lhs, ref T rhs)
     {
