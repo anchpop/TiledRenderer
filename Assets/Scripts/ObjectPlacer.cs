@@ -52,7 +52,7 @@ public class ObjectPlacer : MonoBehaviour
             var sheets = tileSheets.Where(c => c.name == tileSet.Name).ToList();
             if (sheets.Count == 0) throw new System.Exception("Couldn't find tileset " + tileSet.Name + " in the tileSheets list");
 
-            var slicer = new TileSlicer(sheets.First(), tileSet.TileWidth, tileSet.TileHeight, tileSet.Spacing);
+            var slicer = new TileSlicer(sheets.First(), tileSet.TileWidth, tileSet.TileHeight, tileSet.Spacing, tileSet.Margin);
             spriteList.AddRange(slicer.sprites);
 
             if (pixelsPerUnit == -1) pixelsPerUnit = spriteList[spriteList.Count - 1].pixelsPerUnit; // if PixelsPerUnit hasn't been changed by the user, we just guess
