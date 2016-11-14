@@ -233,9 +233,9 @@ public class ObjectPlacer : MonoBehaviour
     }
     public TmxLayerTile getTmxTile(string layer, int gridLocationX, int gridLocationY)
     {
-        var t = getTmxLayer(layer).Tiles.ToList().Where(t => t.X == gridLocationX && t.Y == gridLocationY).ToList();
-        if (t.Count == 0) throw new System.Exception("There were no tiles found at (" + gridLocationX + ", " + gridLocationY + ")");
-        return t.First();
+        var tilesFound = getTmxLayer(layer).Tiles.ToList().Where(t => t.X == gridLocationX && t.Y == gridLocationY).ToList();
+        if (tilesFound.Count == 0) throw new System.Exception("There were no tiles found at (" + gridLocationX + ", " + gridLocationY + ")");
+        return tilesFound.First();
     }
 
 
