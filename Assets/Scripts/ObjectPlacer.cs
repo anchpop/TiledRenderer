@@ -19,6 +19,8 @@ public class ObjectPlacer : MonoBehaviour
     Dictionary<int, TmxTilesetTile> tileIdMap = new Dictionary<int, TmxTilesetTile>();
     Dictionary<TmxLayerTile, GameObject> tileGameobjectMap = new Dictionary<TmxLayerTile, GameObject>();
 
+    Dictionary<string, string> customProperties = new Dictionary<string, string> { { "don't render", "noSprite" }, { "use base prefab", "basePrefab" }, { "ignore", "ignore" }, { "is trigger", "isTrigger" } };
+
     TmxMap map;
 
     void Start () {
@@ -69,14 +71,14 @@ public class ObjectPlacer : MonoBehaviour
         for (int layerindex = 0; layerindex < map.Layers.Count; layerindex++)
         {
             var layer = map.Layers[layerindex];
-            if (!(layer.Properties.ContainsKey("ignore") && layer.Properties["ignore"].ToLower() == "true")) // if they've opted to ignore the layer
+            if (!(layer.Properties.ContainsKey(customProperties["ignore"]) && layer.Properties[customProperties["ignore"]].ToLower() == "true")) // if they've opted to ignore the layer
             {
                 var lparent = new GameObject(layer.Name); // object to parent the tiles created under
                 lparent.transform.SetParent(transform);
 
                 foreach (var tile in layer.Tiles)
                 {
-                    if (tile.Gid > 0 && !(tileIdMap.ContainsKey(tile.Gid) && tileIdMap[tile.Gid].Properties.ContainsKey("ignore") && tileIdMap[tile.Gid].Properties["ignore"].ToLower() == "true"))
+                    if (tile.Gid > 0 && !(tileIdMap.ContainsKey(tile.Gid) && tileIdMap[tile.Gid].Properties.ContainsKey(customProperties["ignore"]) && tileIdMap[tile.Gid].Properties[customProperties["ignore"]].ToLower() == "true"))
                     {
                         var tex = spriteList[tile.Gid];
                         var destx = tile.X * (map.TileWidth / pixelsPerUnit);
@@ -108,10 +110,15 @@ public class ObjectPlacer : MonoBehaviour
             go.transform.Rotate(new Vector3(0, 0, rotate90 ? 90 : 0));
 
             var sprend = go.GetComponent<SpriteRenderer>();
-            if (sprend.sprite == null) sprend.sprite = tex;
-            sprend.flipX = flipX;
-            sprend.flipY = flipY;
-            sprend.sortingOrder = orderInLayer;
+            if (!(tileIdMap.ContainsKey(tile.Gid) && 
+                tileIdMap[tile.Gid].Properties.ContainsKey(customProperties["don't render"]) && 
+                tileIdMap[tile.Gid].Properties[customProperties["don't render"]].ToLower() == "true"))
+            {
+                if (sprend.sprite == null) sprend.sprite = tex;
+                sprend.flipX = flipX;
+                sprend.flipY = flipY;
+                sprend.sortingOrder = orderInLayer;
+            }
 
             if (tileIdMap.ContainsKey(tile.Gid)) // if we have special information about that tile (such as collision information)
                 foreach (TmxObjectGroup oGroup in tileIdMap[tile.Gid].ObjectGroups)
@@ -132,7 +139,7 @@ public class ObjectPlacer : MonoBehaviour
                             boxCol.offset = new Vector2((float)centerXPos, (float)centerYPos) / 2;
                             boxCol.size = new Vector2(width, height);
 
-                            if (collisionObject.Properties.ContainsKey("isTrigger") && collisionObject.Properties["isTrigger"].ToLower() == "true")
+                            if (collisionObject.Properties.ContainsKey(customProperties["is trigger"]) && collisionObject.Properties[customProperties["is trigger"]].ToLower() == "true")
                                 boxCol.isTrigger = true;
                         }
                         else if (collisionObject.ObjectType == TmxObjectType.Polygon) 
@@ -148,7 +155,7 @@ public class ObjectPlacer : MonoBehaviour
                                                                                               (flipY ? -1 : 1) * -((float)p.Y) ) / tex.pixelsPerUnit).ToArray()); 
 
                             polCol.offset = new Vector2(XPos, YPos) / tex.pixelsPerUnit;
-                            if (collisionObject.Properties.ContainsKey("isTrigger") && collisionObject.Properties["isTrigger"].ToLower() == "true")
+                            if (collisionObject.Properties.ContainsKey(customProperties["is trigger"]) && collisionObject.Properties[customProperties["is trigger"]].ToLower() == "true")
                                 polCol.isTrigger = true;
                         }
                         else if (collisionObject.ObjectType == TmxObjectType.Polyline)
@@ -164,7 +171,7 @@ public class ObjectPlacer : MonoBehaviour
                                                                                               (flipY ? -1 : 1) * -((float)p.Y)) / tex.pixelsPerUnit).ToArray();
 
                             edgeCol.offset = new Vector2(XPos, YPos) / tex.pixelsPerUnit;
-                            if (collisionObject.Properties.ContainsKey("isTrigger") && collisionObject.Properties["isTrigger"].ToLower() == "true")
+                            if (collisionObject.Properties.ContainsKey(customProperties["is trigger"]) && collisionObject.Properties[customProperties["is trigger"]].ToLower() == "true")
                                 edgeCol.isTrigger = true;
                         }
                     }
@@ -180,9 +187,10 @@ public class ObjectPlacer : MonoBehaviour
     GameObject getBaseGameobject(TmxLayerTile tile)
     {
         GameObject go = null;
-        if (tileIdMap.ContainsKey(tile.Gid) && tileIdMap[tile.Gid].Properties.ContainsKey("basePrefab"))
+        if (tileIdMap.ContainsKey(tile.Gid) && 
+            tileIdMap[tile.Gid].Properties.ContainsKey(customProperties["use base prefab"]))
         {
-            var fabs = prefabs.Where(p => p.name == tileIdMap[tile.Gid].Properties["basePrefab"]).ToList();
+            var fabs = prefabs.Where(p => p.name == tileIdMap[tile.Gid].Properties[customProperties["use base prefab"]]).ToList();
             if (fabs.Count != 0)
                 go = Instantiate(fabs.First());
             else
@@ -191,7 +199,10 @@ public class ObjectPlacer : MonoBehaviour
         else
             go = new GameObject("Tile");
             
-        if (go.GetComponent<SpriteRenderer>() == null)
+        if (go.GetComponent<SpriteRenderer>() == null &&
+            !(tileIdMap.ContainsKey(tile.Gid) &&
+            tileIdMap[tile.Gid].Properties.ContainsKey(customProperties["don't render"]) &&
+            (tileIdMap[tile.Gid].Properties[customProperties["don't render"]].ToLower() != "true")))
             go.AddComponent<SpriteRenderer>();
         
         return go;

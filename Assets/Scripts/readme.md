@@ -9,7 +9,7 @@ How to use:
 Tips:
 To ignore a layer or tile, add the custom property "ignore" and set it to "true".
 To make a collider into a trigger collider, add the custom property "isTrigger" and set it to "true"
-If you want to give some of your tile gameobjects some extra components (or have a custom material, or have a certain tag, etc.), put those components in a prefab and then put the prefab in the "Prefabs" list in the tileRenderer. Then add the custom property "basePrefab" and set it to the name of your prefab to the tiles you want to be based off that prefab.
+If you want to give some of your tile gameobjects some extra components (or have a custom material, or have a certain tag, etc.), put those components in a prefab and then put the prefab in the "Prefabs" list in the tileRenderer. Then add the custom property "basePrefab" and set it to the name of your prefab to the tiles you want to be based off that prefab. If for whatever reason you don't want the sprite from the tilemap to be added to the Gameobject, simply set the "noSprite" property to "true" or add your own sprite to the base prefab (if you have one).s
 
 Roadmap (order of importance)
 ✓ Android/webplayer/uwp integration (still need to test)  
