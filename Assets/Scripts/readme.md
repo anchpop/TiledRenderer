@@ -17,7 +17,7 @@ Roadmap (order of importance)
 ✓ Polygon collision support    
 ✓ Box collision support    
 ✓ Trigger colliders  
-Creating meshes of quads instead of gameobjects for certain layers
+Objct pooling
 ✓ Polyline collision support    
 ✓ Empty tile in tileset support  
 ✓ Prefab creation  
