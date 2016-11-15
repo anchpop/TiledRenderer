@@ -12,18 +12,18 @@ To make a collider into a trigger collider, add the custom property "isTrigger" 
 If you want to give some of your tile gameobjects some extra components (or have a custom material, or have a certain tag, etc.), put those components in a prefab and then put the prefab in the "Prefabs" list in the tileRenderer. Then add the custom property "basePrefab" and set it to the name of your prefab to the tiles you want to be based off that prefab. If for whatever reason you don't want the sprite from the tilemap to be added to the Gameobject, simply set the "noSprite" property to "true" or add your own sprite to the base prefab (if you have one).s
 
 Roadmap (order of importance)
-✓ Android/webplayer/uwp integration (still need to test)  
-✓ Flipx, flipy, flipdiagonal support  
-✓ Polygon collision support    
-✓ Box collision support    
-✓ Trigger colliders  
-Objct pooling
-✓ Polyline collision support    
-✓ Empty tile in tileset support  
-✓ Prefab creation  
-✓ Tile ignoring  
-✓ Helper functions (get tile properties, get tile form world position, etc.)  
-Quickupdate  
-Editor integration  
-Support for Hexagonal, Isometric, and Staggered
-Render Order
+1. ✓ Android/webplayer/uwp integration (still need to test)  
+2. ✓ Flipx, flipy, flipdiagonal support  
+3. ✓ Polygon collision support    
+4. ✓ Box collision support    
+5. ✓ Trigger colliders  
+6. Object pooling
+7. ✓ Polyline collision support    
+8. ✓ Empty tile in tileset support  
+9. ✓ Prefab creation  
+10. ✓ Tile ignoring  
+11. ✓ Helper functions (get tile properties, get tile form world position, etc.)  
+12. Live updating  
+13. Editor integration  
+14. Support for Hexagonal, Isometric, and Staggered
+15. Support for Render Order
