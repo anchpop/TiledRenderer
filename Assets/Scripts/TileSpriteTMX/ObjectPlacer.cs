@@ -9,7 +9,7 @@ using TiledSharp;
 
 public class ObjectPlacer : MonoBehaviour
 {
-    public string TmxPath;
+    public string TmxPath = null;
     public bool createMapOnAwake = true;
     public float pixelsPerUnit = -1;
     public List<Texture2D> tileSheets = new List<Texture2D>();
@@ -21,11 +21,23 @@ public class ObjectPlacer : MonoBehaviour
 
     Dictionary<string, string> customProperties = new Dictionary<string, string> { { "don't render", "noSprite" }, { "use base prefab", "basePrefab" }, { "ignore", "ignore" }, { "is trigger", "isTrigger" } };
 
-    TmxMap map;
+    TmxMap map = null;
 
     void Start () {
-        if (createMapOnAwake) createTilemap();
+        if (createMapOnAwake)
+        {
+            var url = convertPath(TmxPath);
+            createTilemap(url);
+        }
     }
+    
+
+
+    void refreshMap()
+    {
+        createTilemap();
+    }
+
 
     public void createTilemap(string path)
     {
@@ -34,20 +46,17 @@ public class ObjectPlacer : MonoBehaviour
 
     public void createTilemap()
     {
-        var url = Path.Combine(Application.streamingAssetsPath, TmxPath);
-
-        #if UNITY_EDITOR || !UNITY_ANDROID // Android doesn't need "file://" added because Application.streamingAssetsPath comes with "file:"
-           url = "file://" + url; 
-        #endif
-
-        StartCoroutine(RenderMap(url));
+        StartCoroutine(RenderMap(convertPath(TmxPath)));
     }
 
     IEnumerator RenderMap(string path)
     {
-        var tmx = new WWW(path);
-        yield return tmx;
-        map = new TmxMap(XDocument.Parse(tmx.text));
+        var tmxFile = new WWW(path);
+        yield return tmxFile;
+        if (tmxFile.text == "") throw new System.Exception("The file at " + path + " could not be found");
+        map = new TmxMap(XDocument.Parse(tmxFile.text));
+        if (map != null) Debug.Log("Map file found and parsed");
+
 
         if (map.Orientation != OrientationType.Orthogonal) throw new System.Exception("Modes other than Orthagonal are not supported at this time");  
 
@@ -66,8 +75,7 @@ public class ObjectPlacer : MonoBehaviour
                 tileIdMap[tile.Id + 1] = tile; // tileset ids are always one lower than the tilemap Gid. yeah it's dumb
             }
         }
-
-
+        
         for (int layerindex = 0; layerindex < map.Layers.Count; layerindex++)
         {
             var layer = map.Layers[layerindex];
@@ -267,9 +275,21 @@ public class ObjectPlacer : MonoBehaviour
         rhs = temp;
     }
 
+    public string convertPath(string path)
+    {
+        if (TmxPath == null || TmxPath == "") throw new System.Exception("Invalid path for TMX file");
+        var url = TmxPath;
+        if (!url.Contains("://")) // make sure they haven't already added the "file://" or "www://" 
+        {
+            url = Path.Combine(Application.streamingAssetsPath, TmxPath);
 
-    // Update is called once per frame
-    void Update () {
-	
-	}
+#if UNITY_EDITOR || !UNITY_ANDROID // Android doesn't need "file://" added because Application.streamingAssetsPath comes with "file:"
+            url = "file://" + url;
+#endif
+        }
+
+        return url;
+    }
+
+
 }
