@@ -4,7 +4,7 @@
   <image source="../../TileSheets/wood_tileset.png" width="512" height="512"/>
  </tileset>
  <tileset firstgid="257" name="roguelikeSheet_transparent" tilewidth="16" tileheight="16" spacing="1" tilecount="1767" columns="57">
-  <image source="../TileSheets/roguelikeSheet_transparent.png" width="968" height="526"/>
+  <image source="../../Sprites/Sheets/roguelikeSheet_transparent.png" width="968" height="526"/>
  </tileset>
  <layer name="Tile Layer 1" width="10" height="10">
   <data encoding="csv">
